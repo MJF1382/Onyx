@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Onyx.Models.Database;
 
@@ -11,9 +12,10 @@ using Onyx.Models.Database;
 namespace Onyx.Migrations
 {
     [DbContext(typeof(OnyxDBContext))]
-    partial class OnyxDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230712081326_AddingIdentityTables")]
+    partial class AddingIdentityTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
