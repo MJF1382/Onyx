@@ -17,12 +17,6 @@ namespace Onyx.Models.Database
 
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            base.OnConfiguring(optionsBuilder);
-            optionsBuilder.UseSqlServer("Server=(local);Database=OnyxDB;Trusted_Connection=True");
-        }
-
         public DbSet<Product> Products { get; set; }
     }
 }
