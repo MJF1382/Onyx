@@ -13,27 +13,27 @@ namespace Onyx.Models.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<TEntity>> FindByCondition(Expression<Func<TEntity, bool>> predicate)
+        public async Task<IEnumerable<TEntity>> FindByConditionAsync(Expression<Func<TEntity, bool>> predicate)
         {
             return await _context.Set<TEntity>().Where(predicate).ToListAsync();
         }
 
-        public async Task<TEntity?> FindById(object id)
+        public async Task<TEntity?> FindByIdAsync(object id)
         {
             return await _context.Set<TEntity>().FindAsync(id);
         }
 
-        public async Task<IEnumerable<TEntity>> GetAll()
+        public async Task<IEnumerable<TEntity>> GetAllAsync()
         {
             return await _context.Set<TEntity>().ToListAsync();
         }
 
-        public async Task Add(TEntity entity)
+        public async Task AddAsync(TEntity entity)
         {
             await _context.Set<TEntity>().AddAsync(entity);
         }
 
-        public async Task AddRange(IEnumerable<TEntity> entities)
+        public async Task AddRangeAsync(IEnumerable<TEntity> entities)
         {
             await _context.Set<TEntity>().AddRangeAsync(entities);
         }

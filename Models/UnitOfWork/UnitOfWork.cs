@@ -14,7 +14,7 @@ namespace Onyx.Models.UnitOfWork
 
         public IRepository<TEntity> Repository => new Repository<TEntity>(_context);
 
-        public async Task<bool> Save()
+        public async Task<bool> SaveAsync()
         {
             return Convert.ToBoolean(await _context.SaveChangesAsync());
         }
