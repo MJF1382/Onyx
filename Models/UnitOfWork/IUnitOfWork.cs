@@ -5,6 +5,6 @@ namespace Onyx.Models.UnitOfWork
     public interface IUnitOfWork<TEntity> where TEntity : class
     {
         IRepository<TEntity> Repository { get; }
-        bool Save();
+        Task<bool> Save();
     }
 }
