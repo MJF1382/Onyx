@@ -16,7 +16,12 @@ namespace Onyx.Models.UnitOfWork
 
         public async Task<bool> Save()
         {
-            return Convert.ToBoolean(_context.SaveChangesAsync());
+            return Convert.ToBoolean(await _context.SaveChangesAsync());
+        }
+
+        public void Dispose()
+        {
+            _context.Dispose();
         }
     }
 }

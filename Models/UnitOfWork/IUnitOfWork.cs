@@ -2,7 +2,7 @@
 
 namespace Onyx.Models.UnitOfWork
 {
-    public interface IUnitOfWork<TEntity> where TEntity : class
+    public interface IUnitOfWork<TEntity> : IDisposable where TEntity : class
     {
         IRepository<TEntity> Repository { get; }
         Task<bool> Save();
