@@ -2,7 +2,7 @@
 
 namespace Onyx.Models.Repositories
 {
-    public interface IRepository<TEntity>
+    public interface IRepository<TEntity> where TEntity : class
     {
         Task<IEnumerable<TEntity>> GetAll();
         Task<TEntity?> FindById(object id);
