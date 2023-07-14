@@ -1,6 +1,8 @@
 ﻿@model RegisterViewModel
 
 <form asp-action="Register" method="post">
+    <input type="hidden" asp-for="ReturnUrl" />
+
     <div>
         <label asp-for="FullName"></label>
         <input asp-for="FullName" />
