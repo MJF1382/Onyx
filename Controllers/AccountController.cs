@@ -1,12 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Onyx.Models.ViewModels;
 
 namespace Onyx.Controllers
 {
     public class AccountController : Controller
     {
-        public IActionResult SignIn()
+        public IActionResult SignIn(string returnUrl)
         {
-            return View();
+            RegisterViewModel viewModel = new RegisterViewModel()
+            {
+                ReturnUrl = returnUrl
+            };
+
+            return View(viewModel);
         }
 
         public IActionResult Register()
