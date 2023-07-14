@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Onyx.Models.Database;
+using Onyx.Models.Identity.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
@@ -9,7 +10,7 @@ builder.Services.AddDbContext<OnyxDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
 });
 builder.Services
-    .AddIdentity<IdentityUser, IdentityRole>()
+    .AddIdentity<AppUser, IdentityRole>()
     .AddEntityFrameworkStores<OnyxDBContext>()
     .AddDefaultTokenProviders();
 
