@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Onyx.Models.Database.Entities;
 using Onyx.Models.Identity.Entities;
@@ -12,7 +13,7 @@ namespace Onyx.Models.Database
 
         }
 
-        public OnyxDBContext(DbContextOptions options)
+        public OnyxDBContext(DbContextOptions<OnyxDBContext> options)
             : base(options)
         {
 
