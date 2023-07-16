@@ -13,6 +13,12 @@ builder.Services
     .AddIdentity<AppUser, IdentityRole>()
     .AddEntityFrameworkStores<OnyxDBContext>()
     .AddDefaultTokenProviders();
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.Password.RequiredUniqueChars = 0;
+    options.Password.RequireNonAlphanumeric  = false;
+    options.Password.RequireDigit = 8;
+});
 
 var app = builder.Build();
 
@@ -29,6 +35,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Account}/{action=Register}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
