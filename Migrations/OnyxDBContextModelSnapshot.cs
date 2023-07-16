@@ -173,7 +173,7 @@ namespace Onyx.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("Onyx.Models.Identity.Entities.AppUser", b =>
