@@ -34,11 +34,15 @@ namespace Onyx.Controllers
             if (ModelState.IsValid)
             {
                 AppUser user = await _userManager.FindByNameAsync(viewModel.UserName);
-                var result = await _signInManager.PasswordSignInAsync(user, viewModel.Password, viewModel.RememberMe, false);
 
-                if (result.Succeeded)
+                if (user != null)
                 {
-                    return LocalRedirect(viewModel.ReturnUrl);
+                    var result = await _signInManager.PasswordSignInAsync(user, viewModel.Password, viewModel.RememberMe, false);
+
+                    if (result.Succeeded)
+                    {
+                        return LocalRedirect(viewModel.ReturnUrl);
+                    }
                 }
             }
 
