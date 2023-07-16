@@ -1,7 +1,28 @@
-﻿
-@{
-    ViewData["Title"] = "Index";
-}
+﻿@using Microsoft.AspNetCore.Identity
+@using Onyx.Models.Identity.Entities
+@inject SignInManager<AppUser> _signInManager
+@inject UserManager<AppUser> _userManager
 
-<h1>Index</h1>
-
+<nav>
+    <ul>
+        <li>
+            <a asp-controller="Account" asp-action="Register">
+                ثبت نام
+            </a>
+        </li>
+        <li>
+            @if (_signInManager.IsSignedIn(User))
+            {
+                <a asp-action="Signout">
+                    خروج
+                </a>
+            }
+            else
+            {
+                <a asp-action="SignIn">
+                    ورود
+                </a>
+            }
+        </li>
+    </ul>
+</nav>
