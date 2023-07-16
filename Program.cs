@@ -17,7 +17,7 @@ builder.Services.Configure<IdentityOptions>(options =>
 {
     options.Password.RequiredUniqueChars = 0;
     options.Password.RequireNonAlphanumeric  = false;
-    options.Password.RequireDigit = 8;
+    options.Password.RequiredLength = 8;
 });
 
 var app = builder.Build();

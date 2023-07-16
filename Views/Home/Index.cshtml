@@ -13,13 +13,13 @@
         <li>
             @if (_signInManager.IsSignedIn(User))
             {
-                <a asp-action="Signout">
+                <a asp-controller="Account" asp-action="Signout">
                     خروج
                 </a>
             }
             else
             {
-                <a asp-action="SignIn">
+                <a asp-controller="Account" asp-action="SignIn">
                     ورود
                 </a>
             }
