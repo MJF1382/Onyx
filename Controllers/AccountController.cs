@@ -38,11 +38,11 @@ namespace Onyx.Controllers
 
                 if (result.Succeeded)
                 {
-
+                    return LocalRedirect(viewModel.ReturnUrl);
                 }
             }
 
-            return View();
+            return View(viewModel);
         }
 
         [HttpGet]
