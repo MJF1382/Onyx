@@ -89,19 +89,34 @@ namespace Onyx.Controllers
 
                 if (user != null)
                 {
-                    var result = await _signInManager.PasswordSignInAsync(user, viewModel.Password, viewModel.RememberMe, false);
+                    var result = await _signInManager.PasswordSignInAsync(user, viewModel.Password, viewModel.RememberMe, true);
 
                     if (result.Succeeded)
                     {
                         return LocalRedirect(viewModel.ReturnUrl);
                     }
+                    else if (result.IsLockedOut)
+                    {
+                        return RedirectToAction("LockedOut");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "نام کاربری یا رمز عبور اشتباه است");
+                    }
                 }
+                else
+                {
+                    ModelState.AddModelError("", "نام کاربری یا رمز عبور اشتباه است");
+                }
+            }
+            else
+            {
+                ModelState.AddModelError("", "اطلاعات را وارد کنید");
             }
 
             return View(viewModel);
         }
 
-        [HttpGet]
         public async Task<IActionResult> SignOut()
         {
             await _signInManager.SignOutAsync();
@@ -141,6 +156,11 @@ namespace Onyx.Controllers
             }
 
             return View(viewModel);
+        }
+
+        public IActionResult LockedOut()
+        {
+            return View();
         }
     }
 }
