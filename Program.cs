@@ -2,9 +2,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Onyx.Models.Database;
 using Onyx.Models.Identity.Entities;
+using Onyx.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
+builder.Services.AddTransient<MailSettings>();
+builder.Services.AddTransient<IMailSender, MailSender>();
 builder.Services.AddDbContext<OnyxDBContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
@@ -19,6 +22,7 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireNonAlphanumeric  = false;
     options.Password.RequiredLength = 8;
 });
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
 var app = builder.Build();
 
