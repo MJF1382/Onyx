@@ -17,7 +17,7 @@ namespace Onyx.Services
         public async Task SendAsync(Email email)
         {
             MailMessage message = new MailMessage();
-            message.From = new MailAddress(_mailSettingsOptions.Value.SenderMail);
+            message.From = new MailAddress(_mailSettingsOptions.Value.SenderEmail);
             message.To.Add(email.To);
             message.Subject = email.Subject;
             message.Body = email.Body;
@@ -27,7 +27,7 @@ namespace Onyx.Services
             smtpClient.Port = 587;
             smtpClient.UseDefaultCredentials = false;
             smtpClient.EnableSsl = true;
-            smtpClient.Credentials = new NetworkCredential(_mailSettingsOptions.Value.SenderMail, "Fathi2831Fathi");
+            smtpClient.Credentials = new NetworkCredential(_mailSettingsOptions.Value.SenderEmail, _mailSettingsOptions.Value.SenderPassword);
             await smtpClient.SendMailAsync(message);
         }
     }
