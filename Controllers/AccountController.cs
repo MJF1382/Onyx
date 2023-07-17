@@ -124,7 +124,7 @@ namespace Onyx.Controllers
             if (user != null)
             {
                 string token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                string? callbackUrl = Url.Action("ResetPassword", "Account", new { userName = viewModel.UserName, token = token });
+                string? callbackUrl = Request.Scheme + "://" + Request.Host.Value + Url.Action("ResetPassword", "Account", new { userName = viewModel.UserName, token = token });
 
                 Email email = new Email()
                 {
