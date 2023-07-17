@@ -21,6 +21,8 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequiredUniqueChars = 0;
     options.Password.RequireNonAlphanumeric  = false;
     options.Password.RequiredLength = 8;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromSeconds(5);
+    options.Lockout.MaxFailedAccessAttempts = 3;
 });
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
