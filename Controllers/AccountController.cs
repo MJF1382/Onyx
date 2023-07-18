@@ -127,6 +127,8 @@ namespace Onyx.Controllers
         [HttpGet]
         public IActionResult ForgetPassword()
         {
+            ViewBag.IsSubmitted = false;
+
             return View();
         }
 
@@ -139,13 +141,13 @@ namespace Onyx.Controllers
             if (user != null)
             {
                 string token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                string? callbackUrl = Request.Scheme + "://" + Request.Host.Value + Url.Action("ResetPassword", "Account", new { userName = viewModel.UserName, token = token });
+                string? callbackUrl = Url.Action("ResetPassword", "Account", new { userName = viewModel.UserName, token = token }, Request.Scheme);
 
                 Email email = new Email()
                 {
                     To = user.Email,
                     Subject = "بازیابی رمز عبور",
-                    Body = "برای بازیابی رمز عبور روز لینک زیر کلیک کنید:" + "<br>" + "<a href='" + callbackUrl + "'>بازیابی</a>"
+                    Body = "<b>برای بازیابی رمز عبور روز لینک زیر کلیک کنید:</b>" + "<br>" + $"<a href='{callbackUrl}'>بازیابی</a>"
                 };
 
                 await _mailSender.SendAsync(email);
@@ -155,7 +157,50 @@ namespace Onyx.Controllers
                 ModelState.AddModelError("", "کاربر مورد نظر یافت نشد.");
             }
 
+            ViewBag.IsSubmitted = true;
+
             return View(viewModel);
+        }
+
+        [HttpGet]
+        public IActionResult ResetPassword(string userName, string token)
+        {
+            ResetPasswordViewModel viewModel = new ResetPasswordViewModel()
+            {
+                UserName = userName,
+                Token = token
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel viewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByNameAsync(viewModel.UserName);
+
+                if (user != null)
+                {
+                    var result = await _userManager.ResetPasswordAsync(user, viewModel.Token, viewModel.Password);
+
+                    if (result.Succeeded == false)
+                    {
+                        return RedirectToAction("SignIn");
+                    }
+                    else
+                    {
+                        foreach (IdentityError error in result.Errors)
+                        {
+                            ModelState.AddModelError("", error.Description);
+                        }
+                    }
+                }
+            }
+            
+            return View();
         }
 
         public IActionResult LockedOut()
