@@ -1,0 +1,13 @@
+﻿@if (string.IsNullOrEmpty((string)ViewBag.Message) == false && string.IsNullOrWhiteSpace((string)ViewBag.Message) == false)
+{
+    <p>
+        @ViewBag.Message
+    </p>
+}
+
+<a asp-action="CreateUser">
+    افزودن کاربر جدید
+</a>
+<a asp-action="CreateRole">
+    افزودن نقش جدید
+</a>
