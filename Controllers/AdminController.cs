@@ -8,8 +8,52 @@ namespace Onyx.Controllers
 {
     public class AdminController : Controller
     {
+        private readonly UserManager<AppUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+
+
+        public AdminController(
+            UserManager<AppUser> userManager,
+            RoleManager<IdentityRole> roleManager)
+        {
+            _userManager = userManager;
+            _roleManager = roleManager;
+        }
+
         public IActionResult Index()
         {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult CreateRole()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateRole(RoleViewModel viewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await _roleManager.CreateAsync(new IdentityRole(viewModel.Name));
+
+                if (result.Succeeded)
+                {
+                    ViewBag.Message = "نقش با موفقیت ثبت شد.";
+
+                    return View("Index");
+                }
+                else
+                {
+                    foreach (IdentityError error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+                }
+            }
+
             return View();
         }
     }
