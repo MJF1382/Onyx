@@ -26,6 +26,60 @@ namespace Onyx.Controllers
         }
 
         [HttpGet]
+        public IActionResult CreateUser()
+        {
+            ViewBag.RolesList = new SelectList(_roleManager.Roles.ToList(), "Name", "Name");
+
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateUser(UserViewModel viewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                AppUser user = new AppUser()
+                {
+                    Email = viewModel.Email,
+                    UserName = viewModel.PhoneNumber,
+                    FullName = viewModel.FullName,
+                    PhoneNumber = viewModel.PhoneNumber
+                };
+
+                var result = await _userManager.CreateAsync(user, viewModel.Password);
+
+                if (result.Succeeded)
+                {
+                    result = await _userManager.AddToRolesAsync(user, viewModel.RolesName);
+
+                    if (result.Succeeded)
+                    {
+                        ViewBag.Message = "کاربر با موفقیت افزوده شد.";
+
+                        return View("Index");
+                    }
+                    else
+                    {
+                        foreach (IdentityError error in result.Errors)
+                        {
+                            ModelState.AddModelError("", error.Description);
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (IdentityError error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+                }
+            }
+
+            return View(viewModel);
+        }
+
+        [HttpGet]
         public IActionResult CreateRole()
         {
             return View();
