@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Onyx.Classes;
 using Onyx.Models.Identity.Entities;
 using Onyx.Models.ViewModels;
 using Onyx.Services;
+using System.Security.Claims;
 
 namespace Onyx.Controllers
 {
@@ -11,24 +13,27 @@ namespace Onyx.Controllers
     {
         private readonly SignInManager<AppUser> _signInManager;
         private readonly UserManager<AppUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IMailSender _mailSender;
 
         public AccountController(
             SignInManager<AppUser> signInManager,
             UserManager<AppUser> userManager,
+            RoleManager<IdentityRole> roleManager,
             IMailSender mailSender)
         {
             _signInManager = signInManager;
             _userManager = userManager;
+            _roleManager = roleManager;
             _mailSender = mailSender;
         }
 
         [HttpGet]
-        public IActionResult Register(string? returnUrl = null)
+        public IActionResult Register(string returnUrl = "/")
         {
             RegisterViewModel viewModel = new RegisterViewModel()
             {
-                ReturnUrl = returnUrl ?? Url.Content("~/")
+                ReturnUrl = returnUrl
             };
 
             return View(viewModel);
@@ -69,12 +74,144 @@ namespace Onyx.Controllers
         }
 
         [HttpGet]
-        public IActionResult SignIn(string? returnUrl = null)
+        public IActionResult SignIn(string returnUrl = "/")
         {
             LoginViewModel viewModel = new LoginViewModel()
             {
-                ReturnUrl = returnUrl ?? Url.Content("~/")
+                ReturnUrl = returnUrl
             };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public IActionResult ExternalLogin(string provider, string returnUrl = "/")
+        {
+            string callbackUrl = Url.Action("ExternalLoginCallback", "Account", new { returnUrl = returnUrl }, Request.Scheme);
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, callbackUrl);
+
+            return Challenge(properties, provider);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = "/", string? remoteError = null)
+        {
+            if (remoteError == null)
+            {
+                var info = await _signInManager.GetExternalLoginInfoAsync();
+
+                if (info != null)
+                {
+                    var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, info.AuthenticationProperties.IsPersistent);
+
+                    if (result.Succeeded)
+                    {
+                        var updateResult = await _signInManager.UpdateExternalAuthenticationTokensAsync(info);
+
+                        if (updateResult.Succeeded)
+                        {
+                            return LocalRedirect(returnUrl);
+                        }
+                        else
+                        {
+                            foreach (IdentityError error in updateResult.Errors)
+                            {
+                                ModelState.AddModelError("", error.Description);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        string email = info.Principal.FindFirstValue(ClaimTypes.Email);
+
+                        return RedirectToAction("ExternalLoginConfirmation", new { email = email, returnUrl = returnUrl });
+                    }
+                }
+            }
+            else
+            {
+                ModelState.AddModelError("", remoteError);
+            }
+
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult ExternalLoginConfirmation(string email, string returnUrl = "/")
+        {
+            ExternalLoginConfirmationViewModel model = new ExternalLoginConfirmationViewModel()
+            {
+                Email = email,
+                UserName = email.Split("@")[0],
+                ReturnUrl = returnUrl
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginConfirmationViewModel viewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                AppUser user = new AppUser()
+                {
+                    FullName = viewModel.FullName,
+                    Email = viewModel.Email,
+                    UserName = viewModel.UserName
+                };
+
+                var result = await _userManager.CreateAsync(user);
+
+                if (result.Succeeded)
+                {
+                    var info = await _signInManager.GetExternalLoginInfoAsync();
+
+                    if (info != null)
+                    {
+                        result = await _userManager.AddLoginAsync(user, info);
+
+                        if (result.Succeeded)
+                        {
+                            var externalSignInResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, info.AuthenticationProperties.IsPersistent);
+
+                            if (externalSignInResult.Succeeded)
+                            {
+                                result = await _signInManager.UpdateExternalAuthenticationTokensAsync(info);
+
+                                if (result.Succeeded)
+                                {
+                                    return LocalRedirect(viewModel.ReturnUrl);
+                                }
+                                else
+                                {
+                                    foreach (IdentityError error in result.Errors)
+                                    {
+                                        ModelState.AddModelError("", error.Description);
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            foreach (IdentityError error in result.Errors)
+                            {
+                                ModelState.AddModelError("", error.Description);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (IdentityError error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+                }
+            }
 
             return View(viewModel);
         }
@@ -199,7 +336,7 @@ namespace Onyx.Controllers
                     }
                 }
             }
-            
+
             return View();
         }
 
