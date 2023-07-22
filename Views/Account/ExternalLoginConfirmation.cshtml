@@ -1,0 +1,16 @@
+﻿@model ExternalLoginConfirmationViewModel
+
+<form asp-action="ExternalLoginConfirmation" method="post">
+    <input type="hidden" asp-for="UserName" />
+    <input type="hidden" asp-for="Email" />
+    <input type="hidden" asp-for="ReturnUrl" />
+    <div asp-validation-summary="All"></div>
+
+    <div>
+        <label asp-for="FullName"></label>
+        <input asp-for="FullName" />
+    </div>
+    <div>
+        <input type="submit" />
+    </div>
+</form>
