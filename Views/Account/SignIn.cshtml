@@ -1,4 +1,8 @@
 ﻿@model LoginViewModel
+@using Microsoft.AspNetCore.Identity
+@using Onyx.Models.Identity.Entities
+@inject SignInManager<AppUser> _signInManager
+@inject UserManager<AppUser> _userManager
 
 <form asp-action="SignIn" method="post">
     <input type="hidden" asp-for="ReturnUrl" />
@@ -24,4 +28,17 @@
     <div>
         <input type="submit" />
     </div>
+</form>
+
+@{
+    var externalProviders = await _signInManager.GetExternalAuthenticationSchemesAsync();
+}
+
+<form asp-action="ExternalLogin" method="post">
+    @foreach (var provider in externalProviders)
+    {
+        <button name="provider" value="@provider.Name">
+            @provider.Name
+        </button>
+    }
 </form>
