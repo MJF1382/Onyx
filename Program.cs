@@ -16,6 +16,18 @@ builder.Services
     .AddIdentity<AppUser, IdentityRole>()
     .AddEntityFrameworkStores<OnyxDBContext>()
     .AddDefaultTokenProviders();
+builder.Services
+    .AddAuthentication()
+    .AddGoogle(options =>
+    {
+        options.ClientId = "666755732744-efuc1a7kgu1dihvagutbdirjrom6d4j3.apps.googleusercontent.com";
+        options.ClientSecret = "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";
+    });
+    //.AddFacebook(options =>
+    //{
+    //    options.AppId = "dgdg";
+    //    options.AppSecret = "dgdg";
+    //});
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.Password.RequiredUniqueChars = 0;
