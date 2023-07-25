@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using Onyx.Classes;
 using Onyx.Models.Identity.Entities;
 using Onyx.Models.ViewModels;
 
@@ -20,9 +22,28 @@ namespace Onyx.Controllers
             _roleManager = roleManager;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string? popUpMessage = null)
         {
+            ViewBag.PopUpMessage = popUpMessage;
+
             return View();
+        }
+
+        #region User
+
+        public IActionResult UserIndex()
+        {
+            var model = _userManager.Users.Select(user => new UserViewModel()
+            {
+                Id = user.Id,
+                FullName = user.FullName,
+                Email = user.Email,
+                Password = user.PasswordHash ?? "",
+                PhoneNumber = user.PhoneNumber,
+                UserName = user.UserName
+            }).ToList();
+
+            return View(model);
         }
 
         [HttpGet]
@@ -55,9 +76,7 @@ namespace Onyx.Controllers
 
                     if (result.Succeeded)
                     {
-                        ViewBag.Message = "کاربر با موفقیت افزوده شد.";
-
-                        return View("Index");
+                        return RedirectToAction("Index", new { popUpMessage = "کاربر با موفقیت افزوده شد." });
                     }
                     else
                     {
@@ -80,6 +99,153 @@ namespace Onyx.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> EditUser(string userName)
+        {
+            if (userName.HasValue())
+            {
+                var user = await _userManager.FindByNameAsync(userName);
+
+                if (user != null)
+                {
+                    EditUserViewModel model = new EditUserViewModel();
+                    model.Id = user.Id;
+                    model.FullName = user.FullName;
+                    model.RolesName = (await _userManager.GetRolesAsync(user)).ToList();
+                    model.IsExternalLogin = !user.PasswordHash.HasValue();
+
+                    if (user.PasswordHash.HasValue())
+                    {
+                        model.Email = user.Email;
+                        model.PhoneNumber = user.PhoneNumber;
+                    }
+
+                    ViewBag.RolesList = new SelectList(_roleManager.Roles.ToList(), "Name", "Name");
+
+                    return View(model);
+                }
+            }
+
+            return NotFound();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditUser(EditUserViewModel viewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                AppUser user = await _userManager.FindByIdAsync(viewModel.Id);
+
+                user.FullName = viewModel.FullName;
+                var result = await _userManager.RemoveFromRolesAsync(user, await _userManager.GetRolesAsync(user));
+
+                if (result.Succeeded)
+                {
+                    result = await _userManager.AddToRolesAsync(user, viewModel.RolesName);
+
+                    if (result.Succeeded)
+                    {
+                        result = await _userManager.UpdateAsync(user);
+
+                        if (result.Succeeded)
+                        {
+                            if (viewModel.IsExternalLogin == false)
+                            {
+                                user.PhoneNumber = viewModel.PhoneNumber;
+                                user.Email = viewModel.Email;
+                                user.UserName = viewModel.PhoneNumber;
+                                result = await _userManager.RemovePasswordAsync(user);
+
+                                if (result.Succeeded)
+                                {
+                                    result = await _userManager.AddPasswordAsync(user, viewModel.Password);
+
+                                    if (result.Succeeded)
+                                    {
+                                        return RedirectToAction("Index", new { popUpMessage = "کاربر با موفقیت ویرایش شد." });
+                                    }
+                                    else
+                                    {
+                                        foreach (IdentityError error in result.Errors)
+                                        {
+                                            ModelState.AddModelError("", error.Description);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    foreach (IdentityError error in result.Errors)
+                                    {
+                                        ModelState.AddModelError("", error.Description);
+                                    }
+                                }
+                            }
+
+                            return RedirectToAction("Index", new { popUpMessage = "کاربر با موفقیت ویرایش شد." });
+                        }
+                        else
+                        {
+                            foreach (IdentityError error in result.Errors)
+                            {
+                                ModelState.AddModelError("", error.Description);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (IdentityError error in result.Errors)
+                        {
+                            ModelState.AddModelError("", error.Description);
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (IdentityError error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+                }
+            }
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteUser(string id)
+        {
+            AppUser user = await _userManager.FindByIdAsync(id);
+
+            if (user != null)
+            {
+                var result = await _userManager.DeleteAsync(user);
+
+                if (result.Succeeded)
+                {
+                    return RedirectToAction("Index", new { popUpMessage = "کاربر با موفقیت حذف شد." });
+                }
+                else
+                {
+                    foreach (IdentityError error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+                }
+            }
+            else
+            {
+                return NotFound();
+            }
+
+            return RedirectToAction("Index", new { popUpMessage = "خطا در اتصال به سرور، لطف ابعدا دوباره امتحان کنید." });
+        }
+
+        #endregion
+
+        #region Role
+
+        [HttpGet]
         public IActionResult CreateRole()
         {
             return View();
@@ -95,9 +261,7 @@ namespace Onyx.Controllers
 
                 if (result.Succeeded)
                 {
-                    ViewBag.Message = "نقش با موفقیت ثبت شد.";
-
-                    return View("Index");
+                    return RedirectToAction("Index", new { popUpMessage = "نقش با موفقیت افزوده شد." });
                 }
                 else
                 {
@@ -110,5 +274,7 @@ namespace Onyx.Controllers
 
             return View();
         }
+
+        #endregion
     }
 }
