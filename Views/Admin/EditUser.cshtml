@@ -1,0 +1,34 @@
+﻿@model EditUserViewModel
+
+<form asp-action="EditUser" method="post">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="IsExternalLogin" />
+    <div asp-validation-summary="All"></div>
+
+    <div>
+        <label asp-for="FullName"></label>
+        <input asp-for="FullName" />
+    </div>
+    @if (Model.IsExternalLogin == false)
+    {
+        <div>
+            <label asp-for="PhoneNumber"></label>
+            <input asp-for="PhoneNumber" />
+        </div>
+        <div>
+            <label asp-for="Email"></label>
+            <input asp-for="Email" />
+        </div>
+        <div>
+            <label asp-for="Password"></label>
+            <input asp-for="Password" />
+        </div>
+    }
+    <div>
+        <label asp-for="RolesName"></label>
+        <select asp-items="@ViewBag.RolesList" asp-for="RolesName" multiple></select>
+    </div>
+    <div>
+        <input type="submit" />
+    </div>
+</form>
