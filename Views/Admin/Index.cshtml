@@ -1,13 +1,13 @@
-﻿@if (string.IsNullOrEmpty((string)ViewBag.Message) == false && string.IsNullOrWhiteSpace((string)ViewBag.Message) == false)
+﻿@if (string.IsNullOrEmpty((string)ViewBag.PopUpMessage) == false && string.IsNullOrWhiteSpace((string)ViewBag.PopUpMessage) == false)
 {
     <p>
-        @ViewBag.Message
+        @ViewBag.PopUpMessage
     </p>
 }
 
-<a asp-action="CreateUser">
-    افزودن کاربر جدید
+<a asp-action="UserIndex">
+    مدیریت کاربران
 </a>
-<a asp-action="CreateRole">
-    افزودن نقش جدید
+<a asp-action="RoleINdex">
+    مدیریت نقش ها
 </a>
