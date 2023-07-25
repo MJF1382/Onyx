@@ -1,0 +1,75 @@
+﻿@model List<UserViewModel>
+
+<table>
+    <thead>
+        <tr>
+            <th>
+                ردیف
+            </th>
+            <th>
+                نام کامل
+            </th>
+            <th>
+                نام کاربری
+            </th>
+            <th>
+                ایمیل
+            </th>
+            <th>
+                شماره تلفن
+            </th>
+            <th>
+                نوع اکانت
+            </th>
+            <th>
+                عملیات
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            <tr>
+                <td>
+                    @(i + 1)
+                </td>
+                <td>
+                    @Model[i].FullName
+                </td>
+                <td>
+                    @Model[i].UserName
+                </td>
+                <td>
+                    @Model[i].Email
+                </td>
+                <td>
+                    @Model[i].PhoneNumber
+                </td>
+                <td>
+                    @if (string.IsNullOrEmpty(Model[i].Password) || string.IsNullOrWhiteSpace(Model[i].Password))
+                    {
+                        <div>
+                            لاگین خارجی
+                        </div>
+                    }
+                    else
+                    {
+                        <div>
+                            لاگین داخلی
+                        </div>
+                    }
+                </td>
+                <td>
+                    <a asp-action="EditUser" asp-route-userName="@Model[i].UserName">
+                        ویرایش
+                    </a>
+                    <form asp-action="DeleteUser" method="post">
+                        <button name="id" value="@Model[i].Id">
+                            حذف
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
