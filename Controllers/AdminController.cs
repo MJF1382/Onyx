@@ -245,6 +245,17 @@ namespace Onyx.Controllers
 
         #region Role
 
+        public async Task<IActionResult> RoleIndex()
+        {
+            var model = await _roleManager.Roles.Select(role => new RoleViewModel()
+            {
+                Id = role.Id,
+                Name = role.Name
+            }).ToListAsync();
+
+            return View(model);
+        }
+
         [HttpGet]
         public IActionResult CreateRole()
         {
@@ -272,7 +283,92 @@ namespace Onyx.Controllers
                 }
             }
 
-            return View();
+            return View(viewModel);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditRole(string id)
+        {
+            IdentityRole role = await _roleManager.FindByIdAsync(id);
+
+            if (role != null)
+            {
+                RoleViewModel model = new RoleViewModel()
+                {
+                    Id = role.Id,
+                    Name = role.Name
+                };
+
+                return View(model);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditRole(RoleViewModel viewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                IdentityRole role = await _roleManager.FindByIdAsync(viewModel.Id);
+                role.Name = viewModel.Name;
+
+                if (role != null)
+                {
+                    var result = await _roleManager.UpdateAsync(role);
+
+                    if (result.Succeeded)
+                    {
+                        return RedirectToAction("Index", new { popUpMessage = "نقش با موفقیت ویرایش شد." });
+                    }
+                    else
+                    {
+                        foreach (IdentityError error in result.Errors)
+                        {
+                            ModelState.AddModelError("", error.Description);
+                        }
+                    }
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteRole(string id)
+        {
+            IdentityRole role = await _roleManager.FindByIdAsync(id);
+
+            if (role != null)
+            {
+                var result = await _roleManager.DeleteAsync(role);
+
+                if (result.Succeeded)
+                {
+                    return RedirectToAction("Index", new { popUpMessage = "نقش با موفقیت حذف شد." });
+                }
+                else
+                {
+                    foreach (IdentityError error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+                }
+            }
+            else
+            {
+                return NotFound();
+            }
+
+            return RedirectToAction("Index", new { popUpMessage = "خطا در اتصال به سرور، لطف ابعدا دوباره امتحان کنید." });
         }
 
         #endregion

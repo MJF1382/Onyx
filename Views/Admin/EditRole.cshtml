@@ -1,6 +1,7 @@
 ﻿@model RoleViewModel
 
-<form asp-action="CreateRole" method="post">
+<form asp-action="EditRole" method="post">
+    <input type="hidden" asp-for="Id" />
     <div asp-validation-summary="All"></div>
 
     <div>

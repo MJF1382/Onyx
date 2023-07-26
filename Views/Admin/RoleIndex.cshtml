@@ -1,0 +1,44 @@
+﻿@model List<RoleViewModel>
+
+<a asp-action="CreateRole">
+    افزودن نقش
+</a>
+
+<table>
+    <thead>
+        <tr>
+            <th>
+                ردیف
+            </th>
+            <th>
+                نام
+            </th>
+            <th>
+                عملیات
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            <tr>
+                <td>
+                    @(i + 1)
+                </td>
+                <td>
+                    @Model[i].Name
+                </td>
+                <td>
+                    <a asp-action="EditRole" asp-route-id="@Model[i].Id">
+                        ویرایش
+                    </a>
+                    <form asp-action="DeleteRole" method="post">
+                        <button name="id" value="@Model[i].Id">
+                            حذف
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
