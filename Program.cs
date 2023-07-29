@@ -1,13 +1,17 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Onyx.Authorization.Policies;
 using Onyx.Models.Database;
 using Onyx.Models.Identity.Entities;
 using Onyx.Services;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddTransient<MailSettings>();
 builder.Services.AddTransient<IMailSender, MailSender>();
+builder.Services.AddScoped<IAuthorizationHandler, ExternalLoginUsersHandler>();
 builder.Services.AddDbContext<OnyxDBContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
@@ -23,11 +27,15 @@ builder.Services
         options.ClientId = "666755732744-efuc1a7kgu1dihvagutbdirjrom6d4j3.apps.googleusercontent.com";
         options.ClientSecret = "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";
     });
-    //.AddFacebook(options =>
-    //{
-    //    options.AppId = "dgdg";
-    //    options.AppSecret = "dgdg";
-    //});
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Account/SignIn";
+});
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("ExternalLoginUsers", policy => policy.Requirements.Add(new ExternalLoginUsersRequirement()));
+    options.AddPolicy("ClaimEmail", policy => policy.RequireClaim(ClaimTypes.DateOfBirth));
+});
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.Password.RequiredUniqueChars = 0;
