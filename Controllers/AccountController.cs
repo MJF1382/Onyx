@@ -85,6 +85,49 @@ namespace Onyx.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SignIn(LoginViewModel viewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                AppUser user = await _userManager.FindByNameAsync(viewModel.UserName);
+
+                if (user != null)
+                {
+                    var result = await _signInManager.PasswordSignInAsync(user, viewModel.Password, viewModel.RememberMe, true);
+
+                    if (result.Succeeded)
+                    {
+                        return LocalRedirect(viewModel.ReturnUrl);
+                    }
+                    else if (result.IsLockedOut)
+                    {
+                        return RedirectToAction("LockedOut");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "نام کاربری یا رمز عبور اشتباه است");
+                    }
+                }
+                else
+                {
+                    ModelState.AddModelError("", "نام کاربری یا رمز عبور اشتباه است");
+                }
+            }
+            else
+            {
+                ModelState.AddModelError("", "اطلاعات را وارد کنید");
+            }
+
+            return View(viewModel);
+        }
+
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
+
+        [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public IActionResult ExternalLogin(string provider, string returnUrl = "/")
@@ -211,44 +254,6 @@ namespace Onyx.Controllers
                         ModelState.AddModelError("", error.Description);
                     }
                 }
-            }
-
-            return View(viewModel);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SignIn(LoginViewModel viewModel)
-        {
-            if (ModelState.IsValid)
-            {
-                AppUser user = await _userManager.FindByNameAsync(viewModel.UserName);
-
-                if (user != null)
-                {
-                    var result = await _signInManager.PasswordSignInAsync(user, viewModel.Password, viewModel.RememberMe, true);
-
-                    if (result.Succeeded)
-                    {
-                        return LocalRedirect(viewModel.ReturnUrl);
-                    }
-                    else if (result.IsLockedOut)
-                    {
-                        return RedirectToAction("LockedOut");
-                    }
-                    else
-                    {
-                        ModelState.AddModelError("", "نام کاربری یا رمز عبور اشتباه است");
-                    }
-                }
-                else
-                {
-                    ModelState.AddModelError("", "نام کاربری یا رمز عبور اشتباه است");
-                }
-            }
-            else
-            {
-                ModelState.AddModelError("", "اطلاعات را وارد کنید");
             }
 
             return View(viewModel);
