@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Onyx.Classes;
 using Onyx.Models.Identity.Entities;
 using Onyx.Models.ViewModels;
+using System.Security.Claims;
 
 namespace Onyx.Controllers
 {
@@ -12,7 +14,6 @@ namespace Onyx.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-
 
         public AdminController(
             UserManager<AppUser> userManager,
@@ -22,6 +23,7 @@ namespace Onyx.Controllers
             _roleManager = roleManager;
         }
 
+        [Authorize(Roles = "Admin")]
         public IActionResult Index(string? popUpMessage = null)
         {
             ViewBag.PopUpMessage = popUpMessage;
@@ -31,6 +33,7 @@ namespace Onyx.Controllers
 
         #region User
 
+        [Authorize("ExternalLoginUsers")]
         public IActionResult UserIndex()
         {
             var model = _userManager.Users.Select(user => new UserViewModel()
@@ -47,6 +50,7 @@ namespace Onyx.Controllers
         }
 
         [HttpGet]
+        [Authorize("ExternalLoginUsers")]
         public IActionResult CreateUser()
         {
             ViewBag.RolesList = new SelectList(_roleManager.Roles.ToList(), "Name", "Name");
@@ -56,6 +60,7 @@ namespace Onyx.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize("ExternalLoginUsers")]
         public async Task<IActionResult> CreateUser(UserViewModel viewModel)
         {
             if (ModelState.IsValid)
@@ -99,6 +104,7 @@ namespace Onyx.Controllers
         }
 
         [HttpGet]
+        [Authorize("ExternalLoginUsers")]
         public async Task<IActionResult> EditUser(string userName)
         {
             if (userName.HasValue())
@@ -130,6 +136,7 @@ namespace Onyx.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize("ExternalLoginUsers")]
         public async Task<IActionResult> EditUser(EditUserViewModel viewModel)
         {
             if (ModelState.IsValid)
@@ -213,6 +220,7 @@ namespace Onyx.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize("ExternalLoginUsers")]
         public async Task<IActionResult> DeleteUser(string id)
         {
             AppUser user = await _userManager.FindByIdAsync(id);
@@ -245,6 +253,7 @@ namespace Onyx.Controllers
 
         #region Role
 
+        [Authorize("ClaimEmail")]
         public async Task<IActionResult> RoleIndex()
         {
             var model = await _roleManager.Roles.Select(role => new RoleViewModel()
@@ -257,6 +266,7 @@ namespace Onyx.Controllers
         }
 
         [HttpGet]
+        [Authorize("ClaimEmail")]
         public IActionResult CreateRole()
         {
             return View();
@@ -264,6 +274,7 @@ namespace Onyx.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize("ClaimEmail")]
         public async Task<IActionResult> CreateRole(RoleViewModel viewModel)
         {
             if (ModelState.IsValid)
@@ -287,6 +298,7 @@ namespace Onyx.Controllers
         }
 
         [HttpGet]
+        [Authorize("ClaimEmail")]
         public async Task<IActionResult> EditRole(string id)
         {
             IdentityRole role = await _roleManager.FindByIdAsync(id);
@@ -309,6 +321,7 @@ namespace Onyx.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize("ClaimEmail")]
         public async Task<IActionResult> EditRole(RoleViewModel viewModel)
         {
             if (ModelState.IsValid)
@@ -343,6 +356,7 @@ namespace Onyx.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize("ClaimEmail")]
         public async Task<IActionResult> DeleteRole(string id)
         {
             IdentityRole role = await _roleManager.FindByIdAsync(id);
