@@ -319,6 +319,66 @@ namespace Onyx.Controllers
             return View();
         }
 
+        [HttpGet]
+        public async Task<IActionResult> EditClaim(string claimType, string userId)
+        {
+            AppUser user = await _userManager.FindByIdAsync(userId);
+
+            if (user != null)
+            {
+                Claim claim = _userManager.GetClaimsAsync(user).Result.ToList().Find(p => p.Type == claimType);
+
+                if (claim != null)
+                {
+                    EditClaimViewModel model = new EditClaimViewModel()
+                    {
+                        UserId = userId,
+                        ClaimType = claim.Type,
+                        ClaimValue = claim.Value,
+                        CurrentClaimType = claim.Type
+                    };
+
+                    return View(model);
+                }
+            }
+
+            return NotFound();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditClaim(EditClaimViewModel viewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                AppUser user = await _userManager.FindByIdAsync(viewModel.UserId);
+
+                if (user != null)
+                {
+                    Claim claim = _userManager.GetClaimsAsync(user).Result.ToList().Find(p => p.Type == viewModel.CurrentClaimType);
+
+                    if (claim != null)
+                    {
+                        var result = await _userManager.ReplaceClaimAsync(user, claim, new Claim(viewModel.ClaimType, viewModel.ClaimValue));
+
+                        if (result.Succeeded)
+                        {
+                            return RedirectToAction("UserClaims", new { userName = user.UserName, popUpMessage = "کلیم با موفقیت ویرایش شد." });
+                        }
+                        else
+                        {
+                            foreach (IdentityError error in result.Errors)
+                            {
+                                ModelState.AddModelError("", error.Description);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return View(viewModel);
+        }
+
         #endregion
 
         #region Role
