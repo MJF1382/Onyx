@@ -251,6 +251,36 @@ namespace Onyx.Controllers
 
         #endregion
 
+        #region Claim
+
+        public async Task<IActionResult> UserClaims(string userName, string? popUpMessage = null)
+        {
+            AppUser user = await _userManager.FindByNameAsync(userName);
+
+            if (user != null)
+            {
+                List<UserClaim> claims = _userManager.GetClaimsAsync(user).Result.Select(claim => new UserClaim()
+                {
+                    ClaimType = claim.Type,
+                    ClaimValue = claim.Value
+                }).ToList();
+
+                UserClaimsViewModel model = new UserClaimsViewModel()
+                {
+                    UserId = user.Id,
+                    Claims = claims
+                };
+
+                ViewBag.PopUpMessage = popUpMessage;
+
+                return View(model);
+            }
+
+            return NotFound();
+        }
+
+        #endregion
+
         #region Role
 
         [Authorize("ClaimEmail")]
