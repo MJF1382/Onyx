@@ -379,6 +379,30 @@ namespace Onyx.Controllers
             return View(viewModel);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteClaim(string claimType, string userId)
+        {
+            AppUser user = await _userManager.FindByIdAsync(userId);
+
+            if (user != null)
+            {
+                Claim claim = _userManager.GetClaimsAsync(user).Result.ToList().Find(p => p.Type == claimType);
+
+                if (claim != null)
+                {
+                    var result = await _userManager.RemoveClaimAsync(user, claim);
+
+                    if (result.Succeeded)
+                    {
+                        return RedirectToAction("UserClaims", new { userName = user.UserName, popUpMessage = "کلیم با موفقیت حذف شد." });
+                    }
+                }
+            }
+
+            return NotFound();
+        }
+
         #endregion
 
         #region Role
