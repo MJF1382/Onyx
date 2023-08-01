@@ -1,0 +1,18 @@
+﻿@model CreateClaimViewModel
+
+<form asp-action="CreateClaim" method="post">
+    <input type="hidden" asp-for="UserId" />
+    <div asp-validation-summary="All"></div>
+
+    <div>
+        <label asp-for="ClaimType"></label>
+        <input asp-for="ClaimType" />
+    </div>
+    <div>
+        <label asp-for="ClaimValue"></label>
+        <input asp-for="ClaimValue" />
+    </div>
+    <div>
+        <input type="submit" />
+    </div>
+</form>
