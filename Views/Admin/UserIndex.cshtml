@@ -64,6 +64,9 @@
                     }
                 </td>
                 <td>
+                    <a asp-action="UserClaims" asp-route-userName="@Model[i].UserName">
+                        کلیم ها
+                    </a>
                     <a asp-action="EditUser" asp-route-userName="@Model[i].UserName">
                         ویرایش
                     </a>
