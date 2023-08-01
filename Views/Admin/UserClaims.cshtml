@@ -1,0 +1,58 @@
+﻿@model UserClaimsViewModel
+
+@if (string.IsNullOrEmpty((string)ViewBag.PopUpMessage) == false && string.IsNullOrWhiteSpace((string)ViewBag.PopUpMessage) == false)
+{
+    <p>
+        @ViewBag.PopUpMessage
+    </p>
+}
+
+<a asp-action="CreateClaim" asp-route-userId="@Model.UserId">
+    افزودن کلیم جدید
+</a>
+
+<table>
+    <thead>
+        <tr>
+            <th>
+                ردیف
+            </th>
+            <th>
+                نوع
+            </th>
+            <th>
+                مقدار
+            </th>
+            <th>
+                عملیات
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Model.Claims.Count; i++)
+        {
+            <tr>
+                <td>
+                    @(i + 1)
+                </td>
+                <td>
+                    @Model.Claims[i].ClaimType
+                </td>
+                <td>
+                    @Model.Claims[i].ClaimValue
+                </td>
+                <td>
+                    <a asp-action="EditClaim" asp-route-claimType="@Model.Claims[i].ClaimType" asp-route-userId="@Model.UserId">
+                        ویرایش
+                    </a>
+                    <form asp-action="DeleteClaim" method="post">
+                        <input type="hidden" name="userId" value="@Model.UserId" />
+                        <button name="claimType" value="@Model.Claims[i].ClaimType">
+                            حذف
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
