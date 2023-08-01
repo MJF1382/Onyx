@@ -279,6 +279,46 @@ namespace Onyx.Controllers
             return NotFound();
         }
 
+        [HttpGet]
+        public IActionResult CreateClaim(string userId)
+        {
+            CreateClaimViewModel model = new CreateClaimViewModel()
+            {
+                UserId = userId
+            };
+
+            return View(model);
+        }
+
+        public async Task<IActionResult> CreateClaim(CreateClaimViewModel viewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                AppUser user = await _userManager.FindByIdAsync(viewModel.UserId);
+
+                if (user != null)
+                {
+                    Claim claim = new Claim(viewModel.ClaimType, viewModel.ClaimValue);
+
+                    var result = await _userManager.AddClaimAsync(user, claim);
+
+                    if (result.Succeeded)
+                    {
+                        return RedirectToAction("UserClaims", new { userName = user.UserName, popUpMessage = "کلیم با موفقیت ثبت شد." });
+                    }
+                    else
+                    {
+                        foreach (IdentityError error in result.Errors)
+                        {
+                            ModelState.AddModelError("", error.Description);
+                        }
+                    }
+                }
+            }
+
+            return View();
+        }
+
         #endregion
 
         #region Role
